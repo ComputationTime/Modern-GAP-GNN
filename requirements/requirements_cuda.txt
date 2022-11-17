@@ -1,0 +1,13 @@
+-r requirements_base.txt
+
+--extra-index-url https://download.pytorch.org/whl/cu116
+torch==1.12.1+cu116
+torchvision==0.13.1+cu116
+torchaudio==0.12.1
+
+-f https://data.pyg.org/whl/torch-1.12.0+cu116.html
+torch-scatter
+torch-sparse
+torch-cluster
+torch-spline-conv
+torch-geometric

@@ -1,0 +1,13 @@
+-r requirements_base.txt
+
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==1.12.1+cpu
+torchvision==0.13.1+cpu
+torchaudio==0.12.1
+
+-f https://data.pyg.org/whl/torch-1.12.1+cpu.html
+torch-scatter
+torch-sparse
+torch-cluster
+torch-spline-conv
+torch-geometric
