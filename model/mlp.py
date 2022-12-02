@@ -1,10 +1,10 @@
 import torch.nn as nn
 
 class MLP(nn.Sequential):
-    def __init__(self, dimensions, activation_layer = nn.ReLU):
-        layers = []
+    def __init__(self, dimensions):
+        layers = [nn.Flatten()]
         for i in range(len(dimensions) - 1):
             layers.append(nn.Linear(dimensions[i], dimensions[i+1]))
-            layers.append(activation_layer())
+            layers.append(nn.SELU(inplace=True))
         super().__init__(*layers)
 

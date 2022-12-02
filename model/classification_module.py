@@ -4,9 +4,10 @@ import torch.nn as nn
 from .mlp import MLP
 
 
-class ClassificationModule(nn.Module):
+class MLPClassifier(nn.Module):
     def __init__(self, num_hops, base_dims, head_dims):
-        self.base_mlps = nn.ModuleList([MLP(base_dims) for k in num_hops])
+        super().__init__()
+        self.base_mlps = nn.ModuleList([MLP(base_dims) for _ in range(num_hops+1)])
         self.head_mlp = MLP(head_dims)
         self.softmax = nn.Softmax
 
