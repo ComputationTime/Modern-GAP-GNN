@@ -1,44 +1,45 @@
-################################################################################
-# Pytorch Settings                                                             #
-################################################################################
 import torch
 
-# Fixed random seed
-seed = 11
-torch.manual_seed(seed)
+class config:
+    ################################################################################
+    # Pytorch Settings                                                             #
+    ################################################################################
 
-# Whether or not to use CPU or GPU
-device = "cuda" if torch.cuda.is_available() else "cpu"
+    # Fixed random seed
+    seed = 11
 
-################################################################################
-# Training Settings                                                            #
-################################################################################
+    # Whether or not to use CPU or GPU
+    device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# The name of the dataset to train/test on
-dataset_name = "reddit"
+    ################################################################################
+    # Training Settings                                                            #
+    ################################################################################
 
-# The aggregation module to use (pma, pmat, pmwa)
-aggregation_module_name = "pmwa"
+    # The name of the dataset to train/test on
+    dataset_name = "amazon"
 
-# Values for (epsilon, delta) differential privacy
-epsilon, delta = 8, 1e-5
+    # The aggregation module to use (pma, pmat, pmwa)
+    aggregation_module_name = "pmwa"
 
-# Number of training iterations
-encoder_training_iters = 200
-pmat_training_iters = 500
-model_training_iters = 300
+    # Values for (epsilon, delta) differential privacy
+    epsilon, delta, alpha = 8, 1e-5, 2
 
-# Size of each batch to use during training
-batch_size = 32
+    # Number of training iterations
+    encoder_training_iters = 1000
+    pmat_training_iters = 500
+    model_training_iters = 1000
 
-# Number of message passing steps to be performed in the aggregation module
-num_hops = 5
+    # Size of each batch to use during training
+    batch_size = 256
 
-# Dimensions for the encoder module
-encoder_hidden_dims = [300]
-encoder_output_dim = 60
+    # Number of message passing steps to be performed in the aggregation module
+    num_hops = 1
 
-# Dimensions for the classification module
-classifier_base_hidden_dims = []
-classifier_base_output_dim = 20
-classifier_head_hidden_dims = []
+    # Dimensions for the encoder module
+    encoder_hidden_dims = [300]
+    encoder_output_dim = 60
+
+    # Dimensions for the classification module
+    classifier_base_hidden_dims = []
+    classifier_base_output_dim = 20
+    classifier_head_hidden_dims = []
