@@ -1,0 +1,80 @@
+pma reddit 1
+Epsilon: 1.00, Sigma: 4.901
+Encoder: Loss = 1.458992 --- Accuracy: 81.4%
+Model:   Loss = 1.463670 --- Accuracy: 81.8%
+
+pma reddit 2
+Epsilon: 2.00, Sigma: 2.499
+Encoder: Loss = 1.458992 --- Accuracy: 81.4%
+Model:   Loss = 1.463128 --- Accuracy: 81.8%
+
+pma reddit 4
+Epsilon: 4.00, Sigma: 1.296
+Encoder: Loss = 1.458992 --- Accuracy: 81.4%
+Model:   Loss = 1.460955 --- Accuracy: 82.0%
+
+pma reddit 8
+Epsilon: 8.00, Sigma: 0.690
+Encoder: Loss = 1.458992 --- Accuracy: 81.4%
+Model:   Loss = 1.455587 --- Accuracy: 82.4%
+
+pmwa reddit 1
+Epsilon: 1.00, Sigma: 4.901
+Encoder: Loss = 1.458992 --- Accuracy: 81.4%
+Model:   Loss = 1.429640 --- Accuracy: 86.5%
+
+pmwa reddit 2
+Epsilon: 2.00, Sigma: 2.499
+Encoder: Loss = 1.458992 --- Accuracy: 81.4%
+Model:   Loss = 1.397513 --- Accuracy: 89.8%
+
+pmwa reddit 4
+Epsilon: 4.00, Sigma: 1.296
+Encoder: Loss = 1.458992 --- Accuracy: 81.4%
+Model:   Loss = 1.368712 --- Accuracy: 92.5%
+
+pmwa reddit 8
+Epsilon: 8.00, Sigma: 0.690
+Encoder: Loss = 1.458992 --- Accuracy: 81.4%
+Model:   Loss = 1.346780 --- Accuracy: 94.3%
+
+pma facebook 1
+Epsilon: 1.00, Sigma: 4.901
+Encoder: Loss = 0.970474 --- Accuracy: 77.0%
+Model:   Loss = 0.972421 --- Accuracy: 77.3%
+
+pma facebook 2
+Epsilon: 2.00, Sigma: 2.499
+Encoder: Loss = 0.970474 --- Accuracy: 77.0%
+Model:   Loss = 0.972411 --- Accuracy: 77.2%
+
+pma facebook 4
+Epsilon: 4.00, Sigma: 1.296
+Encoder: Loss = 0.970474 --- Accuracy: 77.0%
+Model:   Loss = 0.972387 --- Accuracy: 77.3%
+
+pma facebook 8
+Epsilon: 8.00, Sigma: 0.690
+Encoder: Loss = 0.970474 --- Accuracy: 77.0%
+Model:   Loss = 0.972293 --- Accuracy: 77.4%
+
+pmwa facebook 1
+Epsilon: 1.00, Sigma: 4.901
+Encoder: Loss = 0.970474 --- Accuracy: 77.0%
+Model:   Loss = 0.976985 --- Accuracy: 76.9%
+
+pmwa facebook 2
+Epsilon: 2.00, Sigma: 2.499
+Encoder: Loss = 0.970474 --- Accuracy: 77.0%
+Model:   Loss = 0.982684 --- Accuracy: 76.3%
+
+pmwa facebook 4
+Epsilon: 4.00, Sigma: 1.296
+Encoder: Loss = 0.970474 --- Accuracy: 77.0%
+Model:   Loss = 0.991244 --- Accuracy: 75.5%
+
+pmwa facebook 8
+Epsilon: 8.00, Sigma: 0.690
+Encoder: Loss = 0.970474 --- Accuracy: 77.0%
+Model:   Loss = 0.999270 --- Accuracy: 74.5%
+

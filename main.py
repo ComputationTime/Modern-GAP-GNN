@@ -67,7 +67,7 @@ def test_model(model, loader, loss_fn):
         accuracy += batch_accuracy
     accuracy /= size
     test_loss /= size
-    print(f"Model: Loss = {test_loss:>8f} --- Accuracy: {(100*accuracy):>0.1f}%")
+    print(f"Model:   Loss = {test_loss:>8f} --- Accuracy: {(100*accuracy):>0.1f}%")
 
 
 def build_encoder(input_dim, num_classes, train_loader, test_loader):
