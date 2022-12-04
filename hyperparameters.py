@@ -1,14 +1,31 @@
+################################################################################
+# Pytorch Settings                                                             #
+################################################################################
+import torch
+
 # Fixed random seed
 seed = 11
+torch.manual_seed(seed)
+
+# Whether or not to use CPU or GPU
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+################################################################################
+# Training Settings                                                            #
+################################################################################
 
 # The name of the dataset to train/test on
-dataset_name = "amazon"
+dataset_name = "reddit"
+
+# The aggregation module to use (pma, pmat, pmwa)
+aggregation_module_name = "pmwa"
 
 # Values for (epsilon, delta) differential privacy
 epsilon, delta = 8, 1e-5
 
 # Number of training iterations
 encoder_training_iters = 200
+pmat_training_iters = 500
 model_training_iters = 300
 
 # Size of each batch to use during training

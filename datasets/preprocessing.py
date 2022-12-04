@@ -3,7 +3,7 @@ from torch_geometric.data import Data
 
 
 # this method partitions based on nodes (so edges between splits are not used)
-def train_test_split(dataset, test_ratio):
+def train_test_split(dataset, test_ratio, device):
     X, y, edge_index = dataset.x, dataset.y, dataset.edge_index
     shuffle_ordering = torch.randperm(X.size(dim=0))
 
@@ -28,8 +28,8 @@ def train_test_split(dataset, test_ratio):
     edge_index_test = edge_index[:, torch.logical_and(
         *~mask[edge_index])] - train_slice
 
-    return Data(x=X_train, y=y_train, edge_index=edge_index_train), \
-        Data(x=X_test, y=y_test, edge_index=edge_index_test)
+    return Data(x=X_train, y=y_train, edge_index=edge_index_train, device=device), \
+        Data(x=X_test, y=y_test, edge_index=edge_index_test, device=device)
 
 
 # returns filtered edge index, first removes edges that have removed src or dst nodes, then shifts indices of remained src/dst nodes
@@ -43,7 +43,7 @@ def filter_edge_index(edge_index, filter):
     return edge_mapping[edge_index[:, edge_filter]]
 
 
-def remove_infrequent_classes(dataset, threshold):
+def remove_infrequent_classes(dataset, threshold, device):
     X, y, edge_index = dataset.x, dataset.y, dataset.edge_index
 
     # remove labels with less examples than threshold
@@ -53,8 +53,8 @@ def remove_infrequent_classes(dataset, threshold):
     y = y[filter]
 
     # remap labels (e.g. if they were 0-8 and we remove 4 labels, new labels should be between 0 and 4)
-    label_mapping = torch.zeros(included_classes.size(dim=0), dtype=torch.long)
-    label_mapping[included_classes] = torch.arange(torch.sum(included_classes))
+    label_mapping = torch.zeros(included_classes.size(dim=0), dtype=torch.long, device=device)
+    label_mapping[included_classes] = torch.arange(included_classes.sum(), device=device)
     y = label_mapping[y]
 
     # remove edges that had their nodes removed
