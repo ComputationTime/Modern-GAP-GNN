@@ -7,9 +7,12 @@ dataset_name = "amazon"
 # Values for (epsilon, delta) differential privacy
 epsilon, delta = 8, 1e-5
 
-# Number of training epochs
-encoder_epochs = 100
-model_epochs = 300
+# Number of training iterations
+encoder_training_iters = 200
+model_training_iters = 300
+
+# Size of each batch to use during training
+batch_size = 32
 
 # Number of message passing steps to be performed in the aggregation module
 num_hops = 5

@@ -1,4 +1,5 @@
 from typing import Tuple
+import torch
 from torch_geometric.data import Data
 from torch_geometric.datasets import Amazon, KarateClub, Reddit
 
@@ -32,4 +33,5 @@ def load_dataset(name, test_ratio) -> Tuple[Data, Data]:
     data = remove_infrequent_classes(data, class_threshold)
     num_classes = len(data.y.unique())
     train, test = train_test_split(data, test_ratio)
+    train.train_mask = torch.ones(train.x.size(dim=0), dtype=torch.bool)
     return train, test, num_classes

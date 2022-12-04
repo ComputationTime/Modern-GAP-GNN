@@ -12,8 +12,8 @@ class GAPBase(nn.Module):
         self.aggregation_module = aggregation_module
         self.classification_module = classification_module
 
-    def forward(self, x, A):
+    def forward(self, x, edge_index):
         x = self.encoder_module(x)
-        x = self.aggregation_module(x, A)
+        x = self.aggregation_module(x, edge_index)
         x = self.classification_module(x)
         return x
