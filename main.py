@@ -176,7 +176,7 @@ def main():
     # Compute noise_scale based on epsilon, delta, and alpha
     noise_scale = compute_aggregation_sigma()
     print(config.aggregation_module_name, config.dataset_name, config.epsilon) # OUTPUT
-    print(f"Epsilon: {config.epsilon}, Sigma: {noise_scale}") # OUTPUT
+    print(f"Epsilon: {config.epsilon:>0.2f}, Sigma: {noise_scale:>0.3f}") # OUTPUT
 
     # Load data
     train_data, test_data, num_classes = load_dataset(config.dataset_name, 0.1)
