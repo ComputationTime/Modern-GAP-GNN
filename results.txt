@@ -1,0 +1,96 @@
+pma reddit 1
+Epsilon: 1.00, Sigma: 4.90
+Test Error: 
+ Avg Accuracy: 81.7%, Avg Loss: 1.454517
+Test Error: 
+ Avg Accuracy: 91.6%, Avg Loss: 0.386151
+pma reddit 2
+Epsilon: 2.00, Sigma: 2.50
+Test Error: 
+ Avg Accuracy: 81.9%, Avg Loss: 1.453413
+Test Error: 
+ Avg Accuracy: 92.9%, Avg Loss: 0.276033
+pma reddit 4
+Epsilon: 4.00, Sigma: 1.30
+Test Error: 
+ Avg Accuracy: 81.7%, Avg Loss: 1.456996
+Test Error: 
+ Avg Accuracy: 93.4%, Avg Loss: 0.291015
+pma reddit 8
+Epsilon: 8.00, Sigma: 0.69
+Test Error: 
+ Avg Accuracy: 81.8%, Avg Loss: 1.455245
+Test Error: 
+ Avg Accuracy: 95.0%, Avg Loss: 0.213838
+pmwa reddit 1
+Epsilon: 1.00, Sigma: 4.90
+Test Error: 
+ Avg Accuracy: 81.8%, Avg Loss: 1.454598
+Test Error: 
+ Avg Accuracy: 90.5%, Avg Loss: 0.374323
+pmwa reddit 2
+Epsilon: 2.00, Sigma: 2.50
+Test Error: 
+ Avg Accuracy: 81.8%, Avg Loss: 1.455062
+Test Error: 
+ Avg Accuracy: 91.9%, Avg Loss: 0.329716
+pmwa reddit 4
+Epsilon: 4.00, Sigma: 1.30
+Test Error: 
+ Avg Accuracy: 81.7%, Avg Loss: 1.455595
+Test Error: 
+ Avg Accuracy: 93.7%, Avg Loss: 0.266327
+pmwa reddit 8
+Epsilon: 8.00, Sigma: 0.69
+Test Error: 
+ Avg Accuracy: 81.7%, Avg Loss: 1.456433
+Test Error: 
+ Avg Accuracy: 93.9%, Avg Loss: 0.232974
+pmwa facebook 1
+Epsilon: 1.00, Sigma: 4.90
+Test Error: 
+ Avg Accuracy: 74.5%, Avg Loss: 0.991616
+Test Error: 
+ Avg Accuracy: 72.7%, Avg Loss: 0.788153
+pmwa facebook 2
+Epsilon: 2.00, Sigma: 2.50
+Test Error: 
+ Avg Accuracy: 75.0%, Avg Loss: 0.984070
+Test Error: 
+ Avg Accuracy: 73.5%, Avg Loss: 0.688763
+pmwa facebook 4
+Epsilon: 4.00, Sigma: 1.30
+Test Error: 
+ Avg Accuracy: 75.5%, Avg Loss: 0.983550
+Test Error: 
+ Avg Accuracy: 75.6%, Avg Loss: 0.691096
+pmwa facebook 8
+Epsilon: 8.00, Sigma: 0.69
+Test Error: 
+ Avg Accuracy: 76.6%, Avg Loss: 0.970318
+Test Error: 
+ Avg Accuracy: 75.0%, Avg Loss: 0.665892
+pma facebook 1
+Epsilon: 1.00, Sigma: 4.90
+Test Error: 
+ Avg Accuracy: 76.3%, Avg Loss: 0.975876
+Test Error: 
+ Avg Accuracy: 75.2%, Avg Loss: 0.677021
+pma facebook 2
+Epsilon: 2.00, Sigma: 2.50
+Test Error: 
+ Avg Accuracy: 76.5%, Avg Loss: 0.972211
+Test Error: 
+ Avg Accuracy: 74.2%, Avg Loss: 0.733533
+pma facebook 4
+Epsilon: 4.00, Sigma: 1.30
+Test Error: 
+ Avg Accuracy: 75.8%, Avg Loss: 0.979164
+Test Error: 
+ Avg Accuracy: 73.9%, Avg Loss: 0.727737
+pma facebook 8
+Epsilon: 8.00, Sigma: 0.69
+Test Error: 
+ Avg Accuracy: 77.2%, Avg Loss: 0.970466
+Test Error: 
+ Avg Accuracy: 73.6%, Avg Loss: 0.740741
