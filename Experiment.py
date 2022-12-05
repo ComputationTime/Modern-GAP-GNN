@@ -150,6 +150,7 @@ class PMWA(AggregationModule):
             normalized = torch.nn.functional.normalize(noised, dim=1)
             out.append(normalized)
         return torch.stack(out)
+        
 class Classification(nn.Module):
     # num_hops - the number of hops covered by this GNN
     # encoder_dimensions - the MLP dimensions of each base MLP
@@ -191,10 +192,13 @@ class GAP(nn.Module):
     self.classification = classification
 
   def forward(self, x):
-    # initial node encoding
-    x_encoded = self.encoder(x)
-    # aggregation module
-    cache = self.pma(x_encoded) 
+    if AggregationModule.edge_index is not None:
+      # initial node encoding
+      x_encoded = self.encoder(x)
+      # aggregation module
+      cache = self.pma(x_encoded)
+    else:
+      cache = x
     # classification
     return self.classification(cache) 
 
@@ -283,7 +287,10 @@ def add_self_edges(dataset):
 def train(batch, model, loss_fn, optimizer):
   model.train()
   X, y = batch.x.to(device), batch.y.to(device)
-  AggregationModule.edge_index = batch.edge_index.to(device)
+  if batch.edge_index is not None:
+    AggregationModule.edge_index = batch.edge_index.to(device)
+  else:
+    AggregationModule.edge_index = None
   # compute prediction error
   pred = model(X)
   loss = loss_fn(pred[:batch.batch_size], y[:batch.batch_size])
@@ -310,16 +317,23 @@ def batch_test(batch, split, model, loss_fn, wordy=False):
 
 # test
 def test(loader, split, model, loss_fn):
-    size = len(loader)
-    model.eval()
-    test_loss, correct = 0, 0
-    for batch in loader:
-        batch_loss, batch_correct = batch_test(batch, split, model, loss_fn)
-        test_loss += batch_loss
-        correct += batch_correct
-    correct /= size
-    test_loss /= size
-    print(f"{split.title()} Error: \n Avg Accuracy: {(100*correct):>0.1f}%, Avg Loss: {test_loss:>8f}")
+  size = len(loader)
+  model.eval()
+  test_loss, correct = 0, 0
+  for data in loader:
+    # HACK: 
+    if type(data) == list:
+      x, y = data
+      x = x.transpose(0, 1) # dim 0 (hop) ; dim 1 (n) ; dim 2 (d)
+      batch = Data(x=x, y=y, batch_size=y.size(0))
+    else:
+      batch = data
+    batch_loss, batch_correct = batch_test(batch, split, model, loss_fn)
+    test_loss += batch_loss
+    correct += batch_correct
+  correct /= size
+  test_loss /= size
+  print(f"{split.title()} Error: \n Avg Accuracy: {(100*correct):>0.1f}%, Avg Loss: {test_loss:>8f}")
 
 
 def compute_aggregation_sigma(model_name, epsilon, pmat_epsilon):
@@ -384,14 +398,35 @@ def main(model_name, dataset_name, eps):
 
     # using large number like 10,000 so that all neighbours are sampled 
     # I don't like how it samples, so I'm just gonna sample everything
+    train_loader_encoder = NeighborLoader(train_dataset, num_neighbors=[X_train.size(dim=0)]*K_hop, 
+                                          batch_size=batch_size, shuffle=True)
     train_loader = NeighborLoader(train_dataset, num_neighbors=[X_train.size(dim=0)]*K_hop, 
-                                  batch_size=batch_size, shuffle=True)
+                                  batch_size=batch_size)
     test_loader = NeighborLoader(test_dataset, num_neighbors=[X_test.size(dim=0)]*K_hop, 
-                                 batch_size=batch_size, shuffle=True)
+                                 batch_size=batch_size)
 
-  elif dataset_name == "molecule":
-    # lol
-    batch_size = 8
+  elif dataset_name == "amazon":
+    dimensions = [767, 300, 60]
+    classification_dims = [60, 20]
+    from torch_geometric.datasets import Amazon
+    dataset = Amazon('./amzn', "Computers")[0]
+    # prepare dataset by removing classes that have less than 1000 examples
+    dataset = prepare_dataset(dataset, 1000)
+    num_classes = torch.unique(dataset.y).size(dim=0)
+    train_dataset, test_dataset = train_test_split(dataset, 0.2)
+    from torch_geometric.loader import NeighborLoader
+
+    X_train, y_train, edge_index_train = train_dataset.x, train_dataset.y, train_dataset.edge_index
+    X_test, y_test, edge_index_test = test_dataset.x, test_dataset.y, test_dataset.edge_index
+
+    # using large number like 10,000 so that all neighbours are sampled 
+    # I don't like how it samples, so I'm just gonna sample everything
+    train_loader_encoder = NeighborLoader(train_dataset, num_neighbors=[X_train.size(dim=0)]*K_hop, 
+                                          batch_size=batch_size, shuffle=True)
+    train_loader = NeighborLoader(train_dataset, num_neighbors=[X_train.size(dim=0)]*K_hop, 
+                                  batch_size=batch_size)
+    test_loader = NeighborLoader(test_dataset, num_neighbors=[X_test.size(dim=0)]*K_hop, 
+                                 batch_size=batch_size)
   elif dataset_name == "facebook":
     dimensions = [128, 64, 32]
     classification_dims = [32, 16]
@@ -406,10 +441,12 @@ def main(model_name, dataset_name, eps):
 
     # using large number like 10,000 so that all neighbours are sampled 
     # I don't like how it samples, so I'm just gonna sample everything
+    train_loader_encoder = NeighborLoader(train_dataset, num_neighbors=[X_train.size(dim=0)]*K_hop, 
+                                          batch_size=batch_size, shuffle=True)
     train_loader = NeighborLoader(train_dataset, num_neighbors=[X_train.size(dim=0)]*K_hop, 
-                                  batch_size=batch_size, shuffle=True)
+                                  batch_size=batch_size)
     test_loader = NeighborLoader(test_dataset, num_neighbors=[X_test.size(dim=0)]*K_hop, 
-                                 batch_size=batch_size, shuffle=True)
+                                 batch_size=batch_size)
 
   encoder_model = nn.Sequential(
       MLP(dimensions),
@@ -422,7 +459,7 @@ def main(model_name, dataset_name, eps):
   optimizer = torch.optim.Adam(encoder_model.parameters(), lr=1e-3)
 
   for t in range(1000):
-      batch = next(iter(train_loader))
+      batch = next(iter(train_loader_encoder))
       train(batch, encoder_model, loss_fn, optimizer)
   test(test_loader, "TEST", encoder_model, loss_fn)
 
@@ -432,13 +469,15 @@ def main(model_name, dataset_name, eps):
     param.requires_grad = False
 
   if model_name == "pma":
-    model = GAP(encoder, 
-                PMA(K_hop, agg_sigma), 
+    agg_func = PMA(K_hop, agg_sigma)
+    model = GAP(encoder,
+                agg_func,
                 Classification(K_hop, classification_dims, [(K_hop+1)*classification_dims[-1], num_classes]))
   elif model_name == "pmwa":
-    model = GAP(encoder, 
-            PMWA(K_hop, agg_sigma), 
-            Classification(K_hop, classification_dims, [(K_hop+1)*classification_dims[-1], num_classes]))
+    agg_func = PMWA(K_hop, agg_sigma)
+    model = GAP(encoder,
+                agg_func,
+                Classification(K_hop, classification_dims, [(K_hop+1)*classification_dims[-1], num_classes]))
   elif model_name == "pmat":
     # Get alpha
     # alpha = np.sqrt((2*agg_sigma*agg_sigma*np.log(1/delta)) / K_hop) + 1
@@ -488,15 +527,36 @@ def main(model_name, dataset_name, eps):
     for param in pmat.parameters():
       param.requires_grad = False
 
-    model = GAP(encoder, pmat, Classification(K_hop, classification_dims, [(K_hop+1)*classification_dims[-1], num_classes]))
+    agg_func = pmat
+    model = GAP(encoder,
+                agg_func,
+                Classification(K_hop, classification_dims, [(K_hop+1)*classification_dims[-1], num_classes]))
 
   model = model.to(device)
   loss_fn = nn.CrossEntropyLoss()
   optimizer = torch.optim.Adam(model.parameters(), lr=1e-1)
   scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=2000, gamma=0.6)
 
+  cache_x = []
+  cache_y = []
+  for batch in train_loader:
+    X, y = batch.x.to(device), batch.y.to(device)
+    AggregationModule.edge_index = batch.edge_index.to(device)
+    cache_x.append(agg_func(encoder(X))[:, :batch.batch_size, :])
+    cache_y.append(y[:batch.batch_size])
+  cache_x = torch.cat(cache_x, dim=1) # dim 0 (hop) ; dim 1 (n) ; dim 2 (d)
+  cache_x = cache_x.transpose(0, 1) # dim 0 (n) ; dim 1 (hop) ; dim 2 (d)
+  cache_y = torch.cat(cache_y, dim=0)
+  # print(f"cache_x ({cache_x.size()}):", cache_x[:5])
+
+  from torch.utils.data import DataLoader, TensorDataset
+  cache = TensorDataset(cache_x, cache_y)
+  train_loader = DataLoader(cache, batch_size=batch_size, shuffle=True)
+
   for t in range(1000):
-    batch = next(iter(train_loader))
+    x, y = next(iter(train_loader))
+    x = x.transpose(0, 1) # dim 0 (hop) ; dim 1 (n) ; dim 2 (d)
+    batch = Data(x=x, y=y, batch_size=y.size(0))
     train(batch, model, loss_fn, optimizer)
     scheduler.step()
   test(test_loader, "TEST", model, loss_fn)

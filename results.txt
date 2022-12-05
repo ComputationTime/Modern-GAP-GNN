@@ -1,66 +1,54 @@
 pma reddit 1.0
 Epsilon: 1.00, Sigma: 4.90
 Test Error: 
- Avg Accuracy: 81.6%, Avg Loss: 1.457280
+ Avg Accuracy: 82.1%, Avg Loss: 1.451674
 Test Error: 
- Avg Accuracy: 91.2%, Avg Loss: 0.391531
+ Avg Accuracy: 88.6%, Avg Loss: 0.516236
 pma reddit 2.0
 Epsilon: 2.00, Sigma: 2.50
 Test Error: 
- Avg Accuracy: 81.4%, Avg Loss: 1.457591
+ Avg Accuracy: 81.3%, Avg Loss: 1.459897
 Test Error: 
- Avg Accuracy: 92.9%, Avg Loss: 0.358699
+ Avg Accuracy: 93.0%, Avg Loss: 0.345637
 pma reddit 4.0
 Epsilon: 4.00, Sigma: 1.30
 Test Error: 
- Avg Accuracy: 81.4%, Avg Loss: 1.458454
+ Avg Accuracy: 81.5%, Avg Loss: 1.457514
 Test Error: 
- Avg Accuracy: 95.1%, Avg Loss: 0.226793
+ Avg Accuracy: 94.6%, Avg Loss: 0.267312
 pma reddit 8.0
 Epsilon: 8.00, Sigma: 0.69
 Test Error: 
- Avg Accuracy: 81.5%, Avg Loss: 1.457074
+ Avg Accuracy: 82.0%, Avg Loss: 1.452971
 Test Error: 
- Avg Accuracy: 94.7%, Avg Loss: 0.243126
+ Avg Accuracy: 95.9%, Avg Loss: 0.189939
 pmwa reddit 1.0
 Epsilon: 1.00, Sigma: 4.90
 Test Error: 
- Avg Accuracy: 81.4%, Avg Loss: 1.459154
+ Avg Accuracy: 81.8%, Avg Loss: 1.454867
 Test Error: 
- Avg Accuracy: 89.2%, Avg Loss: 0.462512
+ Avg Accuracy: 88.6%, Avg Loss: 0.485965
 pmwa reddit 2.0
 Epsilon: 2.00, Sigma: 2.50
 Test Error: 
- Avg Accuracy: 81.5%, Avg Loss: 1.458380
+ Avg Accuracy: 81.8%, Avg Loss: 1.454931
 Test Error: 
- Avg Accuracy: 91.3%, Avg Loss: 0.424668
+ Avg Accuracy: 90.8%, Avg Loss: 0.415692
 pmwa reddit 4.0
 Epsilon: 4.00, Sigma: 1.30
 Test Error: 
- Avg Accuracy: 81.5%, Avg Loss: 1.458718
+ Avg Accuracy: 81.8%, Avg Loss: 1.456273
 Test Error: 
- Avg Accuracy: 90.8%, Avg Loss: 0.411903
+ Avg Accuracy: 92.9%, Avg Loss: 0.339604
 pmwa reddit 8.0
 Epsilon: 8.00, Sigma: 0.69
 Test Error: 
- Avg Accuracy: 81.3%, Avg Loss: 1.460311
+ Avg Accuracy: 81.3%, Avg Loss: 1.459318
 Test Error: 
- Avg Accuracy: 95.4%, Avg Loss: 0.259169
+ Avg Accuracy: 94.9%, Avg Loss: 0.232208
 pma reddit 1.0
 Epsilon: 1.00, Sigma: 4.90
 Test Error: 
- Avg Accuracy: 81.7%, Avg Loss: 1.454965
+ Avg Accuracy: 81.4%, Avg Loss: 1.458401
 Test Error: 
- Avg Accuracy: 89.8%, Avg Loss: 0.443852
-pma reddit 2.0
-Epsilon: 2.00, Sigma: 2.50
-Test Error: 
- Avg Accuracy: 81.7%, Avg Loss: 1.456497
-Test Error: 
- Avg Accuracy: 93.7%, Avg Loss: 0.288893
-pma reddit 4.0
-Epsilon: 4.00, Sigma: 1.30
-Test Error: 
- Avg Accuracy: 81.4%, Avg Loss: 1.459160
-Test Error: 
- Avg Accuracy: 94.9%, Avg Loss: 0.238687
+ Avg Accuracy: 91.5%, Avg Loss: 0.369501
