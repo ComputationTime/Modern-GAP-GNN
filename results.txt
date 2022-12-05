@@ -1,96 +1,66 @@
-pma reddit 1
+pma reddit 1.0
 Epsilon: 1.00, Sigma: 4.90
 Test Error: 
- Avg Accuracy: 81.7%, Avg Loss: 1.454517
+ Avg Accuracy: 81.6%, Avg Loss: 1.457280
 Test Error: 
- Avg Accuracy: 91.6%, Avg Loss: 0.386151
-pma reddit 2
+ Avg Accuracy: 91.2%, Avg Loss: 0.391531
+pma reddit 2.0
 Epsilon: 2.00, Sigma: 2.50
 Test Error: 
- Avg Accuracy: 81.9%, Avg Loss: 1.453413
+ Avg Accuracy: 81.4%, Avg Loss: 1.457591
 Test Error: 
- Avg Accuracy: 92.9%, Avg Loss: 0.276033
-pma reddit 4
+ Avg Accuracy: 92.9%, Avg Loss: 0.358699
+pma reddit 4.0
 Epsilon: 4.00, Sigma: 1.30
 Test Error: 
- Avg Accuracy: 81.7%, Avg Loss: 1.456996
+ Avg Accuracy: 81.4%, Avg Loss: 1.458454
 Test Error: 
- Avg Accuracy: 93.4%, Avg Loss: 0.291015
-pma reddit 8
+ Avg Accuracy: 95.1%, Avg Loss: 0.226793
+pma reddit 8.0
 Epsilon: 8.00, Sigma: 0.69
 Test Error: 
- Avg Accuracy: 81.8%, Avg Loss: 1.455245
+ Avg Accuracy: 81.5%, Avg Loss: 1.457074
 Test Error: 
- Avg Accuracy: 95.0%, Avg Loss: 0.213838
-pmwa reddit 1
+ Avg Accuracy: 94.7%, Avg Loss: 0.243126
+pmwa reddit 1.0
 Epsilon: 1.00, Sigma: 4.90
 Test Error: 
- Avg Accuracy: 81.8%, Avg Loss: 1.454598
+ Avg Accuracy: 81.4%, Avg Loss: 1.459154
 Test Error: 
- Avg Accuracy: 90.5%, Avg Loss: 0.374323
-pmwa reddit 2
+ Avg Accuracy: 89.2%, Avg Loss: 0.462512
+pmwa reddit 2.0
 Epsilon: 2.00, Sigma: 2.50
 Test Error: 
- Avg Accuracy: 81.8%, Avg Loss: 1.455062
+ Avg Accuracy: 81.5%, Avg Loss: 1.458380
 Test Error: 
- Avg Accuracy: 91.9%, Avg Loss: 0.329716
-pmwa reddit 4
+ Avg Accuracy: 91.3%, Avg Loss: 0.424668
+pmwa reddit 4.0
 Epsilon: 4.00, Sigma: 1.30
 Test Error: 
- Avg Accuracy: 81.7%, Avg Loss: 1.455595
+ Avg Accuracy: 81.5%, Avg Loss: 1.458718
 Test Error: 
- Avg Accuracy: 93.7%, Avg Loss: 0.266327
-pmwa reddit 8
+ Avg Accuracy: 90.8%, Avg Loss: 0.411903
+pmwa reddit 8.0
 Epsilon: 8.00, Sigma: 0.69
 Test Error: 
- Avg Accuracy: 81.7%, Avg Loss: 1.456433
+ Avg Accuracy: 81.3%, Avg Loss: 1.460311
 Test Error: 
- Avg Accuracy: 93.9%, Avg Loss: 0.232974
-pmwa facebook 1
+ Avg Accuracy: 95.4%, Avg Loss: 0.259169
+pma reddit 1.0
 Epsilon: 1.00, Sigma: 4.90
 Test Error: 
- Avg Accuracy: 74.5%, Avg Loss: 0.991616
+ Avg Accuracy: 81.7%, Avg Loss: 1.454965
 Test Error: 
- Avg Accuracy: 72.7%, Avg Loss: 0.788153
-pmwa facebook 2
+ Avg Accuracy: 89.8%, Avg Loss: 0.443852
+pma reddit 2.0
 Epsilon: 2.00, Sigma: 2.50
 Test Error: 
- Avg Accuracy: 75.0%, Avg Loss: 0.984070
+ Avg Accuracy: 81.7%, Avg Loss: 1.456497
 Test Error: 
- Avg Accuracy: 73.5%, Avg Loss: 0.688763
-pmwa facebook 4
+ Avg Accuracy: 93.7%, Avg Loss: 0.288893
+pma reddit 4.0
 Epsilon: 4.00, Sigma: 1.30
 Test Error: 
- Avg Accuracy: 75.5%, Avg Loss: 0.983550
+ Avg Accuracy: 81.4%, Avg Loss: 1.459160
 Test Error: 
- Avg Accuracy: 75.6%, Avg Loss: 0.691096
-pmwa facebook 8
-Epsilon: 8.00, Sigma: 0.69
-Test Error: 
- Avg Accuracy: 76.6%, Avg Loss: 0.970318
-Test Error: 
- Avg Accuracy: 75.0%, Avg Loss: 0.665892
-pma facebook 1
-Epsilon: 1.00, Sigma: 4.90
-Test Error: 
- Avg Accuracy: 76.3%, Avg Loss: 0.975876
-Test Error: 
- Avg Accuracy: 75.2%, Avg Loss: 0.677021
-pma facebook 2
-Epsilon: 2.00, Sigma: 2.50
-Test Error: 
- Avg Accuracy: 76.5%, Avg Loss: 0.972211
-Test Error: 
- Avg Accuracy: 74.2%, Avg Loss: 0.733533
-pma facebook 4
-Epsilon: 4.00, Sigma: 1.30
-Test Error: 
- Avg Accuracy: 75.8%, Avg Loss: 0.979164
-Test Error: 
- Avg Accuracy: 73.9%, Avg Loss: 0.727737
-pma facebook 8
-Epsilon: 8.00, Sigma: 0.69
-Test Error: 
- Avg Accuracy: 77.2%, Avg Loss: 0.970466
-Test Error: 
- Avg Accuracy: 73.6%, Avg Loss: 0.740741
+ Avg Accuracy: 94.9%, Avg Loss: 0.238687

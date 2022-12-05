@@ -4,8 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torch_geometric.nn import Sequential, GCNConv
 from torch_geometric.data import Data
+from pyvacy import optim, analysis
 import sys
 device = "cuda" if torch.cuda.is_available() else "cpu"
+
+DEBUG = True
+def debug_print(*args): DEBUG and print(*args)
 
 # Edge level DP
 delta = 1e-5
@@ -174,6 +178,7 @@ class Classification(nn.Module):
         return self.head_mlp(combined_x)
 
 
+
 class GAP(nn.Module):
   # encoder - pretrained encoder module
   # pma - PMA module
@@ -273,6 +278,7 @@ def add_self_edges(dataset):
     edge_index = torch.cat((dataset.edge_index, self_edges), dim=1)
     return Data(x=X, y=dataset.y, edge_index=edge_index)
 
+
 # train
 def train(batch, model, loss_fn, optimizer):
   model.train()
@@ -316,6 +322,16 @@ def test(loader, split, model, loss_fn):
     print(f"{split.title()} Error: \n Avg Accuracy: {(100*correct):>0.1f}%, Avg Loss: {test_loss:>8f}")
 
 
+def compute_aggregation_sigma(model_name, epsilon, pmat_epsilon):
+    global delta, K_hop
+    if model_name == "pmat":
+        # agg_sigma = 1 / np.max(np.roots([K_hop/2, (3/np.sqrt(2))*np.sqrt(2*K_hop*np.log(1/delta)), pmat_epsilon - epsilon]))
+        agg_eps = epsilon - pmat_epsilon
+        agg_sigma = 1 / np.max(np.roots([K_hop/2, np.sqrt(2*K_hop*np.log(1/(delta/2))), -agg_eps]))
+    else:
+        agg_eps = epsilon
+        agg_sigma = 1 / np.max(np.roots([K_hop/2, np.sqrt(2*K_hop*np.log(1/delta)), -agg_eps]))
+    return agg_sigma
 
 
 
@@ -344,15 +360,10 @@ def main(model_name, dataset_name, eps):
   global K_hop
   global batch_size
 
-  alpha = 2
   print(model_name, dataset_name, eps)
-  eps = int(eps)
-  if model_name == "pmat":
-    agg_eps = eps * 0.8 - np.log(delta)/(alpha - 1)
-  else:
-    agg_eps = eps
-  agg_sigma = 1 / np.max(np.roots([K_hop/2, np.sqrt(2*K_hop*np.log(1/delta)), -agg_eps]))
-  print(f"Epsilon: {agg_eps:>0.2f}, Sigma: {agg_sigma:>0.2f}")
+  pmat_epsilon = eps * 0.4
+  agg_sigma = compute_aggregation_sigma(model_name, eps, pmat_epsilon)
+  print(f"Epsilon: {eps:>0.2f}, Sigma: {agg_sigma:>0.2f}")
 
 
 
@@ -379,6 +390,7 @@ def main(model_name, dataset_name, eps):
                                  batch_size=batch_size, shuffle=True)
 
   elif dataset_name == "molecule":
+    # lol
     batch_size = 8
   elif dataset_name == "facebook":
     dimensions = [128, 64, 32]
@@ -416,6 +428,9 @@ def main(model_name, dataset_name, eps):
 
   encoder = encoder_model[0]
   encoder.requires_grad=False
+  for param in encoder.parameters():
+    param.requires_grad = False
+
   if model_name == "pma":
     model = GAP(encoder, 
                 PMA(K_hop, agg_sigma), 
@@ -425,16 +440,56 @@ def main(model_name, dataset_name, eps):
             PMWA(K_hop, agg_sigma), 
             Classification(K_hop, classification_dims, [(K_hop+1)*classification_dims[-1], num_classes]))
   elif model_name == "pmat":
-    #  model = GAP(encoder, 
-    #           pmat, 
-    #           Classification(K_hop, [60, 20], [(K_hop+1)*20, num_classes]))
-    pass
-    
-    
+    # Get alpha
+    # alpha = np.sqrt((2*agg_sigma*agg_sigma*np.log(1/delta)) / K_hop) + 1
+    # print("alpha", alpha)
+    # Create a temporary classification module to train PMAT
+    base_dims = []
+    head_dims = [(K_hop+1) * dimensions[-1], num_classes]
+    temp_classifier = Classification(K_hop, base_dims, head_dims).to(device)
+    pmat_train = nn.Sequential(encoder, PMAT(K_hop, dimensions[-1], agg_sigma), temp_classifier).to(device)
 
-  
+    loss_fn = nn.CrossEntropyLoss()
+    # TODO: Not allowed dyanmic batch_size for DPSGD, our batches are edge-wise
+    # so they should have fixed batch_size!
+    noise_multiplier = 1.0
+    optimizer = optim.DPAdam(
+        l2_norm_clip=1.0,
+        noise_multiplier=noise_multiplier,
+        batch_size=batch_size,
+        params=pmat_train.parameters(),
+        lr=0.5e-1
+    )
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1000, gamma=0.5)
+    
+    edge_epochs = 0
+    for t in range(5000):
+        batch = next(iter(train_loader))
+        train(batch, pmat_train, loss_fn, optimizer)
+        edge_epochs += batch_size / X_train.size(dim=0)
+        epsilon = analysis.moments_accountant(X_train.size(dim=0), batch_size, noise_multiplier, edge_epochs, delta/2)
+        # rdp = analysis.rdp_accountant.compute_rdp(batch_size/X_train.size(dim=0), noise_multiplier, t+1, [alpha])
+        # epsilon, _, _ = analysis.rdp_accountant.get_privacy_spent([alpha], rdp, target_delta=delta)
+      
+        if (t + 1) % 20 == 0:
+          print("Epoch:", edge_epochs)
+          batch_test(next(iter(train_loader)), "TRAIN", pmat_train, loss_fn, True)
+          print("Optimizer Achieves ({:>0.1f}, {})-DP".format(epsilon, delta))
+          print("LR:", scheduler.get_last_lr()[0])
+        scheduler.step()
+        if epsilon >= pmat_epsilon:
+          break
+    debug_print("Trained PMAT in %d iterations" % t)
+    test(test_loader, "TEST", pmat_train, loss_fn)
+    print("Done!")
 
- 
+    pmat = pmat_train[1]
+    pmat.requires_grad = False
+    for param in pmat.parameters():
+      param.requires_grad = False
+
+    model = GAP(encoder, pmat, Classification(K_hop, classification_dims, [(K_hop+1)*classification_dims[-1], num_classes]))
+
   model = model.to(device)
   loss_fn = nn.CrossEntropyLoss()
   optimizer = torch.optim.Adam(model.parameters(), lr=1e-1)
@@ -459,5 +514,8 @@ def main(model_name, dataset_name, eps):
 
 
 if __name__ == "__main__":
-   main(sys.argv[1], sys.argv[2], sys.argv[3])
+  try:
+    main(sys.argv[1], sys.argv[2], float(sys.argv[3]))
+  except KeyboardInterrupt:
+    print("Received KeyboardInterrupt... cancelling.")
 
