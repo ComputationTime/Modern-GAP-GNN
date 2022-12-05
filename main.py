@@ -98,7 +98,9 @@ def build_encoder(input_dim, num_classes, train_loader, test_loader):
     
     return encoder
 
-def train_pmat(pmat, train_loader, encoder, num_examples, num_classes, pmat_epsilon, pmat_delta):
+def train_pmat(pmat: PMAT, train_loader, encoder, num_examples, num_classes, pmat_epsilon, pmat_delta, optimizer_epsilon):
+    # Get alpha
+    alpha = np.sqrt((2*pmat.sigma*pmat.sigma*np.log(1/pmat_delta)) / config.num_hops) + 1
     # Create a temporary classification module to train PMAT
     base_dims = [
         config.encoder_output_dim, 
@@ -118,9 +120,10 @@ def train_pmat(pmat, train_loader, encoder, num_examples, num_classes, pmat_epsi
     loss_fn = nn.CrossEntropyLoss()
     # TODO: Not allowed dyanmic batch_size for DPSGD, our batches are edge-wise
     # so they should have fixed batch_size!
+    noise_multiplier = 1.0
     optimizer = optim.DPAdam(
         l2_norm_clip=1.0,
-        noise_multiplier=1.0,
+        noise_multiplier=noise_multiplier,
         batch_size=config.batch_size,
         params=pmat_train.parameters(),
         lr=0.5e-1
@@ -131,14 +134,22 @@ def train_pmat(pmat, train_loader, encoder, num_examples, num_classes, pmat_epsi
         batch = next(iter(train_loader)).to(config.device)
         loss, accuracy = train(pmat_train, [batch.x, batch.edge_index], batch.y, batch.batch_size, loss_fn, optimizer)
         edge_epochs += config.batch_size / num_examples
-        epsilon = analysis.moments_accountant(num_examples, config.batch_size, 1.0, edge_epochs, pmat_delta)
+        # max_order = 32
+        # orders = range(2, max_order + 1)
+        # rdp = np.zeros_like(orders, dtype=float)
+        # for q, sigma, T in parameters:
+        #   rdp += rdp_accountant.compute_rdp(q, sigma, T, orders)
+        # eps, _, opt_order = rdp_accountant.get_privacy_spent(rdp, target_delta=delta)
+        rdp = analysis.rdp_accountant.compute_rdp(config.batch_size/num_examples, noise_multiplier, t, [alpha])
+        epsilon, _, _ = analysis.rdp_accountant.get_privacy_spent([alpha], rdp, target_delta=pmat_delta)
+        # epsilon = analysis.rdp_acccountant(num_examples, config.batch_size, 1.0, edge_epochs, pmat_delta)
         if t % 50 == 0:
             debug_print(
                 "  Iter %3d: Loss = %0.3f --- Accuracy = %0.3f --- (%0.3f, %f)-DP" %
                 (t, loss, accuracy, epsilon, pmat_delta)
             )
         scheduler.step()
-        if epsilon >= pmat_epsilon:
+        if epsilon >= optimizer_epsilon:
             break
 
     # Freeze PMAT parameters
@@ -163,10 +174,12 @@ def build_aggregation_module(module_name, noise_scale):
 def compute_aggregation_sigma():
     num_hops, epsilon, delta = config.num_hops, config.epsilon, config.delta
     if config.aggregation_module_name == "pmat":
-        agg_eps = epsilon * 0.8 - np.log(config.delta)/(config.alpha - 1)
+        opt_epsilon = config.opt_epsilon
+        agg_sigma = 1 / np.max(np.roots([num_hops/2, (3/np.sqrt(2))*np.sqrt(2*num_hops*np.log(1/delta)), opt_epsilon - epsilon]))
+        # agg_eps = epsilon * 0.8 - np.log(config.delta)/(config.alpha - 1)
     else:
         agg_eps = epsilon
-    agg_sigma = 1 / np.max(np.roots([num_hops/2, np.sqrt(2*num_hops*np.log(1/delta)), -agg_eps]))
+        agg_sigma = 1 / np.max(np.roots([num_hops/2, np.sqrt(2*num_hops*np.log(1/delta)), -agg_eps]))
     return agg_sigma
 
 
@@ -193,7 +206,7 @@ def main():
     aggregation_module = build_aggregation_module(config.aggregation_module_name, noise_scale)
     if config.aggregation_module_name.lower() == "pmat":
         debug_print("Pre-training PMAT...")
-        train_pmat(aggregation_module, train_loader, encoder, n, num_classes, config.epsilon, config.delta)
+        train_pmat(aggregation_module, train_loader, encoder, n, num_classes, config.epsilon, config.delta, config.epsilon_opt)
 
     # Build full model
     base_dims = [

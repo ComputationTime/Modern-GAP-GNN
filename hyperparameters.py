@@ -19,10 +19,11 @@ class config:
     dataset_name = "amazon"
 
     # The aggregation module to use (pma, pmat, pmwa)
-    aggregation_module_name = "pmwa"
+    aggregation_module_name = "pmat"
 
     # Values for (epsilon, delta) differential privacy
-    epsilon, delta, alpha = 8, 1e-5, 2
+    epsilon, delta = 8, 1e-5
+    opt_epsilon = epsilon * 0.2
 
     # Number of training iterations
     encoder_training_iters = 1000
