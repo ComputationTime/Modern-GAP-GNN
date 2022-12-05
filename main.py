@@ -15,7 +15,7 @@ from model.model import GAPBase
 from hyperparameters import config
 from utils import compute_accuracy
 
-DEBUG = False
+DEBUG = True
 def debug_print(*argv): DEBUG and print(*argv)
 
 
@@ -67,7 +67,7 @@ def test_model(model, loader, loss_fn):
         accuracy += batch_accuracy
     accuracy /= size
     test_loss /= size
-    print(f"Model:   Loss = {test_loss:>8f} --- Accuracy: {(100*accuracy):>0.1f}%")
+    print(f"Model:   Loss = {test_loss:>8f} --- Acc.5racy: {(100*accuracy):>0.1f}%")
 
 
 def build_encoder(input_dim, num_classes, train_loader, test_loader):
@@ -98,9 +98,10 @@ def build_encoder(input_dim, num_classes, train_loader, test_loader):
     
     return encoder
 
-def train_pmat(pmat: PMAT, train_loader, encoder, num_examples, num_classes, pmat_epsilon, pmat_delta, optimizer_epsilon):
+def train_pmat(pmat: PMAT, train_loader, encoder, num_examples, num_classes, pmat_delta, optimizer_epsilon):
     # Get alpha
     alpha = np.sqrt((2*pmat.sigma*pmat.sigma*np.log(1/pmat_delta)) / config.num_hops) + 1
+    print("Alpha:", alpha)
     # Create a temporary classification module to train PMAT
     base_dims = [
         config.encoder_output_dim, 
@@ -126,9 +127,9 @@ def train_pmat(pmat: PMAT, train_loader, encoder, num_examples, num_classes, pma
         noise_multiplier=noise_multiplier,
         batch_size=config.batch_size,
         params=pmat_train.parameters(),
-        lr=0.5e-1
+        lr=2e-2
     )
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1000, gamma=0.5)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=300, gamma=0.5)
     edge_epochs = 0
     for t in range(1, config.pmat_training_iters+1):
         batch = next(iter(train_loader)).to(config.device)
@@ -184,6 +185,9 @@ def compute_aggregation_sigma():
 
 
 def main():
+    # pip install wheel
+    # pip install -r requirements/requirements_cuda.txt
+    # python main.py --dataset_name reddit
     torch.manual_seed(config.seed)
 
     # Compute noise_scale based on epsilon, delta, and alpha
@@ -206,7 +210,7 @@ def main():
     aggregation_module = build_aggregation_module(config.aggregation_module_name, noise_scale)
     if config.aggregation_module_name.lower() == "pmat":
         debug_print("Pre-training PMAT...")
-        train_pmat(aggregation_module, train_loader, encoder, n, num_classes, config.epsilon, config.delta, config.epsilon_opt)
+        train_pmat(aggregation_module, train_loader, encoder, n, num_classes, config.delta, config.opt_epsilon)
 
     # Build full model
     base_dims = [

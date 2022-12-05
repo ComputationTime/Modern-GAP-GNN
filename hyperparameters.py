@@ -26,12 +26,12 @@ class config:
     opt_epsilon = epsilon * 0.2
 
     # Number of training iterations
-    encoder_training_iters = 1000
-    pmat_training_iters = 500
+    encoder_training_iters = 500
+    pmat_training_iters = 10000
     model_training_iters = 1000
 
     # Size of each batch to use during training
-    batch_size = 256
+    batch_size = 400
 
     # Number of message passing steps to be performed in the aggregation module
     num_hops = 1
