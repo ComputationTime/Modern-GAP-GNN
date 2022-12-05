@@ -446,7 +446,7 @@ def main(model_name, dataset_name, eps):
   pmat_opt_iterations = 1000
   noise_multiplier = 1.3
   pmat_epsilon = analysis.moments_accountant(X_train.size(dim=0), batch_size, noise_multiplier, (batch_size/X_train.size(dim=0))*pmat_opt_iterations, delta/2)
-  if pmat_epsilon > eps:
+  if model_name == "pmat" and pmat_epsilon > eps:
     return
   agg_sigma = compute_aggregation_sigma(model_name, eps, pmat_epsilon, pmat_opt_iterations)
   print(f"Epsilon: {eps:>0.2f}, Sigma: {agg_sigma:>0.2f}")
