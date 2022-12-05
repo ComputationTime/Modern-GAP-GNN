@@ -8,7 +8,7 @@ from pyvacy import optim, analysis
 import sys
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-DEBUG = True
+DEBUG = False
 def debug_print(*args): DEBUG and print(*args)
 
 # Edge level DP
@@ -336,12 +336,12 @@ def test(loader, split, model, loss_fn):
   print(f"{split.title()} Error: \n Avg Accuracy: {(100*correct):>0.1f}%, Avg Loss: {test_loss:>8f}")
 
 
-def compute_aggregation_sigma(model_name, epsilon, pmat_epsilon):
+def compute_aggregation_sigma(model_name, epsilon, pmat_epsilon, iterations):
     global delta, K_hop
     if model_name == "pmat":
         # agg_sigma = 1 / np.max(np.roots([K_hop/2, (3/np.sqrt(2))*np.sqrt(2*K_hop*np.log(1/delta)), pmat_epsilon - epsilon]))
         agg_eps = epsilon - pmat_epsilon
-        agg_sigma = 1 / np.max(np.roots([K_hop/2, np.sqrt(2*K_hop*np.log(1/(delta/2))), -agg_eps]))
+        agg_sigma = 1 / np.max(np.roots([iterations*K_hop/2, np.sqrt(2*iterations*K_hop*np.log(1/(delta/2))), -agg_eps]))
     else:
         agg_eps = epsilon
         agg_sigma = 1 / np.max(np.roots([K_hop/2, np.sqrt(2*K_hop*np.log(1/delta)), -agg_eps]))
@@ -375,12 +375,6 @@ def main(model_name, dataset_name, eps):
   global batch_size
 
   print(model_name, dataset_name, eps)
-  pmat_epsilon = eps * 0.4
-  agg_sigma = compute_aggregation_sigma(model_name, eps, pmat_epsilon)
-  print(f"Epsilon: {eps:>0.2f}, Sigma: {agg_sigma:>0.2f}")
-
-
-
 
   if dataset_name == "reddit":
     dimensions = [602, 300, 60]
@@ -427,6 +421,7 @@ def main(model_name, dataset_name, eps):
                                   batch_size=batch_size)
     test_loader = NeighborLoader(test_dataset, num_neighbors=[X_test.size(dim=0)]*K_hop, 
                                  batch_size=batch_size)
+
   elif dataset_name == "facebook":
     dimensions = [128, 64, 32]
     classification_dims = [32, 16]
@@ -447,6 +442,15 @@ def main(model_name, dataset_name, eps):
                                   batch_size=batch_size)
     test_loader = NeighborLoader(test_dataset, num_neighbors=[X_test.size(dim=0)]*K_hop, 
                                  batch_size=batch_size)
+
+  pmat_opt_iterations = 1000
+  noise_multiplier = 1.3
+  pmat_epsilon = analysis.moments_accountant(X_train.size(dim=0), batch_size, noise_multiplier, (batch_size/X_train.size(dim=0))*pmat_opt_iterations, delta/2)
+  if pmat_epsilon > eps:
+    return
+  agg_sigma = compute_aggregation_sigma(model_name, eps, pmat_epsilon, pmat_opt_iterations)
+  print(f"Epsilon: {eps:>0.2f}, Sigma: {agg_sigma:>0.2f}")
+
 
   encoder_model = nn.Sequential(
       MLP(dimensions),
@@ -491,7 +495,6 @@ def main(model_name, dataset_name, eps):
     loss_fn = nn.CrossEntropyLoss()
     # TODO: Not allowed dyanmic batch_size for DPSGD, our batches are edge-wise
     # so they should have fixed batch_size!
-    noise_multiplier = 1.0
     optimizer = optim.DPAdam(
         l2_norm_clip=1.0,
         noise_multiplier=noise_multiplier,
@@ -502,25 +505,23 @@ def main(model_name, dataset_name, eps):
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1000, gamma=0.5)
     
     edge_epochs = 0
-    for t in range(5000):
-        batch = next(iter(train_loader))
+    for t in range(pmat_opt_iterations):
+        batch = next(iter(train_loader_encoder))
         train(batch, pmat_train, loss_fn, optimizer)
         edge_epochs += batch_size / X_train.size(dim=0)
-        epsilon = analysis.moments_accountant(X_train.size(dim=0), batch_size, noise_multiplier, edge_epochs, delta/2)
+        # epsilon = analysis.moments_accountant(X_train.size(dim=0), batch_size, noise_multiplier, edge_epochs, delta/2)
+        
         # rdp = analysis.rdp_accountant.compute_rdp(batch_size/X_train.size(dim=0), noise_multiplier, t+1, [alpha])
         # epsilon, _, _ = analysis.rdp_accountant.get_privacy_spent([alpha], rdp, target_delta=delta)
       
-        if (t + 1) % 20 == 0:
-          print("Epoch:", edge_epochs)
-          batch_test(next(iter(train_loader)), "TRAIN", pmat_train, loss_fn, True)
-          print("Optimizer Achieves ({:>0.1f}, {})-DP".format(epsilon, delta))
-          print("LR:", scheduler.get_last_lr()[0])
+        # if (t + 1) % 100 == 0:
+          # print("Epoch:", edge_epochs)
+          # batch_test(next(iter(train_loader_encoder)), "TRAIN", pmat_train, loss_fn, True)
+          # print("Optimizer Achieves ({:>0.1f}, {})-DP".format(epsilon, delta))
+          # print("LR:", scheduler.get_last_lr()[0])
         scheduler.step()
-        if epsilon >= pmat_epsilon:
-          break
-    debug_print("Trained PMAT in %d iterations" % t)
+    # debug_print("Trained PMAT in %d iterations" % t)
     test(test_loader, "TEST", pmat_train, loss_fn)
-    print("Done!")
 
     pmat = pmat_train[1]
     pmat.requires_grad = False

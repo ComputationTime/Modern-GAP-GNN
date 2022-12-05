@@ -52,3 +52,99 @@ Test Error:
  Avg Accuracy: 81.4%, Avg Loss: 1.458401
 Test Error: 
  Avg Accuracy: 91.5%, Avg Loss: 0.369501
+pma reddit 2.0
+Epsilon: 2.00, Sigma: 2.50
+Test Error: 
+ Avg Accuracy: 81.3%, Avg Loss: 1.458596
+Test Error: 
+ Avg Accuracy: 92.6%, Avg Loss: 0.411202
+pma reddit 4.0
+Epsilon: 4.00, Sigma: 1.30
+Test Error: 
+ Avg Accuracy: 81.1%, Avg Loss: 1.460564
+Test Error: 
+ Avg Accuracy: 94.1%, Avg Loss: 0.267104
+pma reddit 8.0
+Epsilon: 8.00, Sigma: 0.69
+Test Error: 
+ Avg Accuracy: 81.8%, Avg Loss: 1.454648
+Test Error: 
+ Avg Accuracy: 94.3%, Avg Loss: 0.249536
+pma facebook 1.0
+Epsilon: 1.00, Sigma: 4.90
+Test Error: 
+ Avg Accuracy: 75.9%, Avg Loss: 0.977878
+Test Error: 
+ Avg Accuracy: 75.6%, Avg Loss: 0.640654
+pma facebook 2.0
+Epsilon: 2.00, Sigma: 2.50
+Test Error: 
+ Avg Accuracy: 76.3%, Avg Loss: 0.975062
+Test Error: 
+ Avg Accuracy: 74.6%, Avg Loss: 0.658642
+pma facebook 4.0
+Epsilon: 4.00, Sigma: 1.30
+Test Error: 
+ Avg Accuracy: 75.8%, Avg Loss: 0.980982
+Test Error: 
+ Avg Accuracy: 74.1%, Avg Loss: 0.664731
+pma facebook 8.0
+Epsilon: 8.00, Sigma: 0.69
+Test Error: 
+ Avg Accuracy: 75.0%, Avg Loss: 0.987582
+Test Error: 
+ Avg Accuracy: 71.9%, Avg Loss: 0.733193
+pmwa facebook 1.0
+Epsilon: 1.00, Sigma: 4.90
+Test Error: 
+ Avg Accuracy: 76.9%, Avg Loss: 0.972610
+Test Error: 
+ Avg Accuracy: 75.4%, Avg Loss: 0.651712
+pmwa facebook 2.0
+Epsilon: 2.00, Sigma: 2.50
+Test Error: 
+ Avg Accuracy: 76.0%, Avg Loss: 0.977168
+Test Error: 
+ Avg Accuracy: 74.2%, Avg Loss: 0.692840
+pmwa facebook 4.0
+Epsilon: 4.00, Sigma: 1.30
+Test Error: 
+ Avg Accuracy: 76.0%, Avg Loss: 0.978076
+Test Error: 
+ Avg Accuracy: 74.7%, Avg Loss: 0.690375
+pmwa facebook 8.0
+Epsilon: 8.00, Sigma: 0.69
+Test Error: 
+ Avg Accuracy: 75.2%, Avg Loss: 0.986290
+Test Error: 
+ Avg Accuracy: 73.7%, Avg Loss: 0.704917
+pma reddit 1.0
+Epsilon: 1.00, Sigma: 4.90
+Test Error: 
+ Avg Accuracy: 81.4%, Avg Loss: 1.458237
+Test Error: 
+ Avg Accuracy: 91.2%, Avg Loss: 0.404306
+pma reddit 2.0
+pma reddit 4.0
+pma reddit 8.0
+pmwa reddit 1.0
+pmwa reddit 2.0
+pmwa reddit 4.0
+pmwa reddit 8.0
+pma reddit 1.0
+pma reddit 2.0
+pma reddit 4.0
+pma reddit 8.0
+pma facebook 1.0
+pma facebook 2.0
+pma facebook 4.0
+pma facebook 8.0
+pmwa facebook 1.0
+pmwa facebook 2.0
+pmwa facebook 4.0
+pmwa facebook 8.0
+pma reddit 1.0
+pma reddit 4.0
+pma reddit 8.0
+pmwa reddit 1.0
+pmwa reddit 2.0
