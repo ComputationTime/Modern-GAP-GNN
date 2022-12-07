@@ -7,18 +7,23 @@ import numpy as np
 def plot_results(filepath):
     file = open(filepath)
     lines = file.readlines()
-    table = {'agg_func': [], 'dataset': [], 'eps': [], 'encoder_acc': [], 'model_acc': []}
+    table = {'agg_func': [], 'dataset': [], 'eps': [], 'encoder_acc': [], 'model_acc': [], 'att_acc': []}
     result = None
 
     for idx, line in enumerate(lines):
-        if not result:
-            args = line.split()
-            result = {'agg_func': args[0], 'dataset': args[1], 'eps': float(args[2]), 'encoder_acc': None, 'model_acc': None}
-            continue
+
+        test_line = re.search('Test Error:', line)
+        epsilon_line = re.search('Epsilon:', line)
         accuracy = re.search('Avg Accuracy: ((\d|\.)+)', line)
+        if not result or (not accuracy and not test_line and not epsilon_line):
+            args = line.split()
+            result = {'agg_func': args[0], 'dataset': args[1], 'eps': float(args[2]), 'encoder_acc': None, 'model_acc': None, 'att_acc': None}
+            continue
         if accuracy:
             if not result['encoder_acc']:
                 result['encoder_acc'] = float(accuracy.group(1))
+            # elif result['agg_func'] == 'pmat' and not result['att_acc']:
+            #     result['att_acc'] = float(accuracy.group(1))
             else:
                 result['model_acc'] = float(accuracy.group(1))
         if result['model_acc']:
@@ -27,9 +32,13 @@ def plot_results(filepath):
             table['eps'].append(result['eps'])
             table['encoder_acc'].append(result['encoder_acc'])
             table['model_acc'].append(result['model_acc'])
+            table['att_acc'].append(result['att_acc'])
             result = None
 
+
     df = pd.DataFrame.from_dict(table)
+    y_min = df['model_acc'].min()-3
+    y_max = df['model_acc'].max()+3
     datasets = df['dataset'].unique()
     agg_funcs = df['agg_func'].unique()
     f = plt.figure(figsize=(len(datasets)*4,4))
@@ -39,31 +48,20 @@ def plot_results(filepath):
         for j in range(len(agg_funcs)):
             agg_func = agg_funcs[j]
             data = df.loc[(df['dataset'] == dataset) & (df['agg_func'] == agg_func)]
+            data_means = data[['eps', 'model_acc']].groupby('eps').agg('mean')
             x = data['eps']
             y = data['model_acc']
+            y_mean = data_means['model_acc']
             plt.scatter(x, y, label=agg_func.upper())
-            # plt.plot(x, y)
+            plt.plot(data_means.index, y_mean)
         plt.title(dataset.capitalize())
         plt.xlabel('Epsilon')
-        plt.legend(loc='lower right')
+        plt.ylim(y_min, y_max)
         if i == 0:
             plt.ylabel('Model accuracy')
+            plt.legend(loc='center right')
     plt.tight_layout()
     plt.savefig('plot.png')
-
-    # if chosen_dataset != None:
-    #     df = df[df['dataset'] == chosen_dataset]
-    #     df = pd.pivot_table(df, values='throughput', index=['system'], columns=['grow'], aggfunc=np.mean)
-    #
-    #     for index, row in df.iterrows():
-    #         plt.scatter(row.index,row.values,label=index)
-    #         plt.plot(row.index, row.values)
-    #     plt.legend()
-    #     plt.yscale('log')
-    #     plt.title(title + " on " + chosen_dataset)
-    #     plt.xlabel('Grow coefficient')
-    #     plt.ylabel('Throughput (edges/s)')
-    #     plt.savefig('plot.png')
 
 if __name__ == "__main__":
   try:

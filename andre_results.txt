@@ -22,8 +22,6 @@ Test Error:
  Avg Accuracy: 90.2%, Avg Loss: 0.841911
 Test Error: 
  Avg Accuracy: 89.7%, Avg Loss: 0.620205
-pmat facebook 2.0
-pmat amazon 4.0
 pma facebook 2.0
 Epsilon: 2.00, Sigma: 2.50
 Test Error: 
@@ -48,8 +46,6 @@ Test Error:
  Avg Accuracy: 89.0%, Avg Loss: 0.851519
 Test Error: 
  Avg Accuracy: 88.5%, Avg Loss: 0.576738
-pmat facebook 2.0
-pmat amazon 4.0
 pma facebook 2.0
 Epsilon: 2.00, Sigma: 2.50
 Test Error: 
@@ -74,8 +70,6 @@ Test Error:
  Avg Accuracy: 90.3%, Avg Loss: 0.839844
 Test Error: 
  Avg Accuracy: 89.6%, Avg Loss: 0.544069
-pmat facebook 2.0
-pmat amazon 4.0
 pma facebook 2.0
 Epsilon: 2.00, Sigma: 2.50
 Test Error: 
@@ -100,8 +94,6 @@ Test Error:
  Avg Accuracy: 88.9%, Avg Loss: 0.852909
 Test Error: 
  Avg Accuracy: 85.8%, Avg Loss: 0.607468
-pmat facebook 2.0
-pmat amazon 4.0
 pma facebook 2.0
 Epsilon: 2.00, Sigma: 2.50
 Test Error: 
@@ -126,5 +118,3 @@ Test Error:
  Avg Accuracy: 89.7%, Avg Loss: 0.847313
 Test Error: 
  Avg Accuracy: 89.2%, Avg Loss: 0.695383
-pmat facebook 2.0
-pmat amazon 4.0
