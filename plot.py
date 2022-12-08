@@ -4,6 +4,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+model_name_map = {
+    'pma': 'PMA',
+    'pmwa': 'Similarity Weighting',
+    'pmat': 'Learned Weighting'
+}
+
 def plot_results(filepath):
     file = open(filepath)
     lines = file.readlines()
@@ -49,11 +55,14 @@ def plot_results(filepath):
             agg_func = agg_funcs[j]
             data = df.loc[(df['dataset'] == dataset) & (df['agg_func'] == agg_func)]
             data_means = data[['eps', 'model_acc']].groupby('eps').agg('mean')
+            data_std = data[['eps', 'model_acc']].groupby('eps').agg('std')
             x = data['eps']
             y = data['model_acc']
             y_mean = data_means['model_acc']
-            plt.scatter(x, y, label=agg_func.upper())
-            plt.plot(data_means.index, y_mean)
+            # plt.scatter(x, y, label=model_name_map[agg_func])
+            # plt.scatter(data_means.index, y_mean, label=model_name_map[agg_func])
+            # plt.plot(data_means.index, y_mean)
+            plt.errorbar(data_means.index, y_mean, data_std.to_numpy().flatten(), capsize=5, label=model_name_map[agg_func])
         plt.title(dataset.capitalize())
         plt.xlabel('Epsilon')
         plt.ylim(y_min, y_max)
