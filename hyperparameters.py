@@ -31,7 +31,7 @@ class config:
     model_training_iters = 1000
 
     # Size of each batch to use during training
-    batch_size = 400
+    batch_size = 256
 
     # Number of message passing steps to be performed in the aggregation module
     num_hops = 1

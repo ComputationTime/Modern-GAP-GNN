@@ -1,6 +1,3 @@
-import torch
-
-
 def compute_accuracy(posteriors, labels):
     predictions = posteriors.argmax(dim=1)
     num_correct = (predictions == labels).sum()

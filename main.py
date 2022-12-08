@@ -1,3 +1,4 @@
+import pickle
 import sys
 
 import numpy as np
@@ -19,13 +20,14 @@ DEBUG = True
 def debug_print(*argv): DEBUG and print(*argv)
 
 
-def train(model, inputs, labels, batch_size, loss_fn, optimizer):
+def train(model, batch, inputs, loss_fn, optimizer):
     model.train()
+    batch_size = batch.batch_size
 
     # Compute posteriors and loss on training set
-    posteriors = model(*inputs)
-    loss = loss_fn(posteriors[:batch_size], labels[:batch_size])
-    accuracy = compute_accuracy(posteriors[:batch_size], labels[:batch_size])
+    posteriors = model(*[getattr(batch, key) for key in inputs])
+    loss = loss_fn(posteriors[:batch_size], batch.y[:batch_size])
+    accuracy = compute_accuracy(posteriors[:batch_size], batch.y[:batch_size])
 
     # Do backpropogation
     optimizer.zero_grad()
@@ -35,39 +37,30 @@ def train(model, inputs, labels, batch_size, loss_fn, optimizer):
 
     return float(loss), float(accuracy)
 
-def test(model, inputs, labels, batch_size, loss_fn):
-    with torch.inference_mode():
-        # Compute posteriors and loss on test set
-        posteriors = model(*inputs)
-        loss = loss_fn(posteriors[:batch_size], labels[:batch_size])
-        accuracy = compute_accuracy(posteriors[:batch_size], labels[:batch_size])
+@torch.inference_mode()
+def test_batch(model, batch, inputs, loss_fn):
+    batch_size = batch.batch_size
+
+    # Compute posteriors and loss on test set
+    posteriors = model(*[getattr(batch, key) for key in inputs])
+    loss = loss_fn(posteriors[:batch_size], batch.y[:batch_size])
+    accuracy = compute_accuracy(posteriors[:batch_size], batch.y[:batch_size])
+    
     return float(loss), float(accuracy)
 
 
-def test_encoder(encoder, loader, loss_fn):
-    size = len(loader)
-    encoder.eval()
-    test_loss, accuracy = 0, 0
-    for batch in loader:
-        batch_loss, batch_accuracy = test(encoder, [batch.x], batch.y, batch.batch_size, loss_fn)
-        test_loss += batch_loss
-        accuracy += batch_accuracy
-    accuracy /= size
-    test_loss /= size
-    print(f"Encoder: Loss = {test_loss:>8f} --- Accuracy: {(100*accuracy):>0.1f}%")
-
-
-def test_model(model, loader, loss_fn):
-    size = len(loader)
+@torch.inference_mode()
+def test(model, inputs, loader, loss_fn):
     model.eval()
-    test_loss, accuracy = 0, 0
+    size = len(loader)
+    total_loss, total_accuracy = 0, 0
+    n = 0
     for batch in loader:
-        batch_loss, batch_accuracy = test(model, [batch.x, batch.edge_index], batch.y, batch.batch_size, loss_fn)
-        test_loss += batch_loss
-        accuracy += batch_accuracy
-    accuracy /= size
-    test_loss /= size
-    print(f"Model:   Loss = {test_loss:>8f} --- Acc.5racy: {(100*accuracy):>0.1f}%")
+        loss, accuracy = test_batch(model, batch, inputs, loss_fn)
+        total_loss += loss
+        total_accuracy += accuracy
+        n += 1
+    return total_loss / size, total_accuracy / size
 
 
 def build_encoder(input_dim, num_classes, train_loader, test_loader):
@@ -84,19 +77,20 @@ def build_encoder(input_dim, num_classes, train_loader, test_loader):
     encoder_accuracies = []
     for t in range(1, config.encoder_training_iters+1):
         batch = next(iter(train_loader))
-        loss, accuracy = train(encoder_train, [batch.x], batch.y, batch.batch_size, loss_fn, optimizer)
+        loss, accuracy = train(encoder_train, batch, ['x'], loss_fn, optimizer)
+        encoder_losses.append(loss)
+        encoder_accuracies.append(accuracy)
         if (t % 10) == 0:
             debug_print("  Iter %3d: Loss = %0.3f --- Accuracy = %0.3f" % (t, loss, accuracy))
-            encoder_losses.append(loss)
-            encoder_accuracies.append(accuracy)
 
     # Freeze encoder gradients
     for param in encoder.parameters():
         param.requires_grad = False
 
-    test_encoder(encoder_train, test_loader, loss_fn)
+    # Compute test loss and accuracy
+    test_loss, test_accuracy = test(encoder_train, ['x'], test_loader, loss_fn)
     
-    return encoder
+    return encoder, encoder_losses, encoder_accuracies, test_loss, test_accuracy
 
 def train_pmat(pmat: PMAT, train_loader, encoder, num_examples, num_classes, pmat_delta, optimizer_epsilon):
     # Get alpha
@@ -133,7 +127,7 @@ def train_pmat(pmat: PMAT, train_loader, encoder, num_examples, num_classes, pma
     edge_epochs = 0
     for t in range(1, config.pmat_training_iters+1):
         batch = next(iter(train_loader)).to(config.device)
-        loss, accuracy = train(pmat_train, [batch.x, batch.edge_index], batch.y, batch.batch_size, loss_fn, optimizer)
+        loss, accuracy = train(pmat_train, batch, ['x', 'edge_index'], loss_fn, optimizer)
         edge_epochs += config.batch_size / num_examples
         # max_order = 32
         # orders = range(2, max_order + 1)
@@ -204,7 +198,10 @@ def main():
     n, d = train_data.x.size()
 
     # Build and pre-train encoder module
-    encoder = build_encoder(d, num_classes, train_loader, test_loader)
+    encoder, encoder_losses, encoder_accuracies, loss, accuracy = build_encoder(d, num_classes, train_loader, test_loader)
+    with open('encoder.pkl', 'wb') as f:
+        pickle.dump({'loss': encoder_losses, 'acc': encoder_accuracies}, f)
+    debug_print("Encoder: Loss = %0.3f --- Accuracy = %0.3f" % (loss, accuracy))
 
     # Build aggregation module
     aggregation_module = build_aggregation_module(config.aggregation_module_name, noise_scale)
@@ -235,14 +232,19 @@ def main():
     model_accuracies = []
     for t in range(1, config.model_training_iters+1):
         batch = next(iter(train_loader)).to(config.device)
-        loss, accuracy = train(model, [batch.x, batch.edge_index], batch.y, batch.batch_size, loss_fn, optimizer)
+        loss, accuracy = train(model, batch, ['x', 'edge_index'], loss_fn, optimizer)
         # scheduler.step()
+        model_losses.append(loss)
+        model_accuracies.append(accuracy)
         if (t % 10) == 0:
             debug_print("  Iter %3d: Loss = %0.3f --- Accuracy = %0.3f" % (t, loss, accuracy))
-            model_losses.append(loss)
-            model_accuracies.append(accuracy)
-    test_model(model, test_loader, loss_fn)
-    print()
+    with open('model.pkl', 'wb') as f:
+        pickle.dump({'loss': model_losses, 'acc': model_accuracies}, f)
+
+    loss, accuracy = test(model, ['x', 'edge_index'], test_loader, loss_fn)
+    debug_print("Model: Loss = %0.3f --- Accuracy = %0.3f" % (loss, accuracy))
+
+    debug_print()
 
 
 if __name__ == "__main__":
